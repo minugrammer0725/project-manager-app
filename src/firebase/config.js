@@ -4,6 +4,7 @@
 import firebase from "firebase/app";
 import "firebase/firestore";
 import "firebase/auth";
+import "firebase/storage";
 
 // 3) config object.
 const firebaseConfig = {
@@ -19,12 +20,13 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const projectFirestore = firebase.firestore();
 const projectAuth = firebase.auth();
+const projectStorage = firebase.storage();
 
 // 5) timestamp helper function.
 const timestamp = firebase.firestore.Timestamp;
 
 // 6) export services.
-export { projectFirestore, projectAuth, timestamp };
+export { projectFirestore, projectAuth, projectStorage, timestamp };
 
 // 7) Connect to firebase CLI
 /*
