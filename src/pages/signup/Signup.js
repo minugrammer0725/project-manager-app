@@ -1,5 +1,6 @@
 import "./Signup.css";
 import React, { useState } from "react";
+import { useSignup } from "../../hooks/useSignup";
 
 const Signup = () => {
   const [email, setEmail] = useState("");
@@ -8,9 +9,11 @@ const Signup = () => {
   const [thumbnail, setThumbnail] = useState(null);
   const [thumbnailError, setThumbnailError] = useState(null);
 
+  const { signup, isPending, error } = useSignup();
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log(email, password, displayName, thumbnail);
+    signup(email, password, displayName, thumbnail);
   };
 
   const handleFileChange = (e) => {
@@ -28,9 +31,9 @@ const Signup = () => {
       setThumbnailError("Please choose an Image file.");
       return;
     }
-    if (selected.size > 100000) {
-      // if file is greater than 100,000 bytes -> error
-      setThumbnailError("Image file size must be less than 100kb.");
+    if (selected.size > 300000) {
+      // if file is greater than 300,000 bytes -> error
+      setThumbnailError("Image file size must be less than 300kb.");
       return;
     }
 
@@ -74,7 +77,14 @@ const Signup = () => {
         <input type="file" required onChange={handleFileChange} />
         {thumbnailError && <div className="error">{thumbnailError}</div>}
       </label>
-      <button className="btn">sign up</button>
+      {isPending ? (
+        <button disabled className="btn">
+          loading..
+        </button>
+      ) : (
+        <button className="btn">sign up</button>
+      )}
+      {error && <div className="error">{error}</div>}
     </form>
   );
 };
