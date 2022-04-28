@@ -1,11 +1,16 @@
 import "./Create.css";
 
 import React, { useState, useEffect } from "react";
+import { useHistory } from "react-router-dom";
 // do "npm install react-select" first.
 // react Select Component
 import Select from "react-select";
 import { useCollection } from "../../hooks/useCollection";
+import { timestamp } from "../../firebase/config";
+import { useAuthContext } from "../../hooks/useAuthContext";
+import { useFirestore } from "../../hooks/useFirestore";
 
+// global variable
 const categories = [
   { value: "development", label: "Development" },
   { value: "design", label: "Design" },
@@ -28,6 +33,10 @@ const Create = () => {
   const { documents } = useCollection("users");
   const [users, setUsers] = useState([]);
   const [formError, setFormError] = useState(null);
+  const { user } = useAuthContext();
+
+  const { addDocument, response } = useFirestore("projects");
+  const history = useHistory();
 
   useEffect(() => {
     if (documents) {
@@ -41,7 +50,7 @@ const Create = () => {
     }
   }, [documents]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setFormError(null);
     if (!category) {
@@ -53,7 +62,38 @@ const Create = () => {
       return;
     }
 
-    console.log(name, details, dueDate, category, assignedUsers);
+    const createdBy = {
+      displayName: user.displayName,
+      photoURL: user.photoURL,
+      id: user.uid,
+    };
+
+    const assignedUsersList = assignedUsers.map((u) => {
+      return {
+        // remember, assignUsers has "label" and "value" properties.
+        displayName: u.value.displayName,
+        photoURL: u.value.photoURL,
+        id: u.value.id,
+      };
+    });
+
+    // construct a project object
+    const project = {
+      name,
+      details,
+      category: category.value,
+      dueDate: timestamp.fromDate(new Date(dueDate)),
+      comment: [],
+      createdBy,
+      assignedUsersList,
+    };
+
+    // upload the project to firestore db named "projects".
+    await addDocument(project);
+    if (!response.error) {
+      // redirect to dashboard.
+      history.push("/");
+    }
   };
 
   return (
