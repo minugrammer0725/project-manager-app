@@ -38,6 +38,7 @@ export const useSignup = () => {
       await res.user.updateProfile({ displayName, photoURL });
 
       // create a user document & upload to firestore.
+      // associate doc id with user id.
       await projectFirestore.collection("users").doc(res.user.uid).set({
         online: true,
         displayName,
